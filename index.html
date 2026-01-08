@@ -13,104 +13,72 @@
         
         .card { width: 100%; max-width: 440px; padding: 48px 40px; border-radius: 20px; text-align: center; border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(0,0,0,0.04); transition: all 0.3s ease; }
         
-        .main-logo { width: 90px; height: 90px; border-radius: 22px; object-fit: cover; margin-bottom: 24px; border: 1px solid #eee; }
+        .main-logo { width: 90px; height: 90px; margin-bottom: 24px; border-radius: 18px; }
+        h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 8px; }
+        p { color: #86868b; font-size: 15px; line-height: 1.5; margin-bottom: 32px; }
+
+        .btn { display: inline-block; width: 100%; padding: 14px 0; background: var(--primary); color: white; border-radius: 10px; font-weight: 500; text-decoration: none; border: none; cursor: pointer; transition: opacity 0.2s; font-size: 15px; }
+        .btn:hover { opacity: 0.9; }
+
+        #term { display: none; text-align: left; background: #f5f5f7; padding: 20px; border-radius: 12px; font-family: "SF Mono", Menlo, monospace; font-size: 13px; color: #1d1d1f; border: 1px solid var(--border); height: 180px; overflow-y: auto; margin-top: 20px; line-height: 1.6; }
         
-        h1 { font-size: 28px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.5px; }
-        .desc { font-size: 16px; color: #86868b; margin-bottom: 32px; line-height: 1.4; }
-
-        /* Buttons */
-        .btn-google { display: flex; align-items: center; justify-content: center; width: 100%; padding: 14px; background: white; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 16px; font-weight: 500; cursor: pointer; transition: 0.2s; }
-        .btn-google:hover { background: #f5f5f7; }
-        .btn-google img { width: 20px; margin-right: 12px; }
-
-        .btn-primary { width: 100%; padding: 16px; background: #000; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        #file-input { display: none; }
+        .upload-area { border: 1px dashed var(--border); padding: 30px; border-radius: 12px; cursor: pointer; margin-bottom: 20px; transition: background 0.2s; }
+        .upload-area:hover { background: #fbfbfd; }
         
-        /* Logic Sections */
-        #engine-ui { display: none; }
-        .upload-zone { border: 2px dashed #0071e3; padding: 40px 20px; border-radius: 16px; background: #f5f5f7; cursor: pointer; margin-bottom: 20px; }
-        .terminal { background: #1d1d1f; color: #00ffcc; padding: 20px; border-radius: 12px; text-align: left; font-family: "SF Mono", Menlo, monospace; font-size: 13px; height: 120px; overflow-y: auto; display: none; margin-bottom: 20px; }
-
-        #success-box { display: none; background: #e8f5e9; padding: 20px; border-radius: 12px; color: #1b5e20; font-weight: 500; }
+        #success-box { display: none; margin-top: 20px; }
+        .status-dot { height: 8px; width: 8px; background-color: #28cd41; border-radius: 50%; display: inline-block; margin-right: 5px; }
     </style>
 </head>
 <body>
 
-<div class="card" id="login-ui">
-    <img src="logo.JPG" alt="Titancore Logo" class="main-logo">
-    <h1>Titancore Labs</h1>
-    <p class="desc">Sign in to access advanced encryption and script protection services.</p>
-    <button class="btn-google" onclick="login()">
-        <img src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png">
-        Continue with Google
-    </button>
-</div>
-
-<div class="card" id="engine-ui">
-    <img src="logo.JPG" alt="Titancore" style="width: 50px; border-radius: 10px; margin-bottom: 15px;">
-    <h2 id="user-greeting">Welcome, Developer</h2>
-    <p class="desc">Titancore Shield V6.0 is active</p>
+<div class="card">
+    <img src="logo.JPG" class="main-logo" alt="Titancore Logo">
+    <h1>Titancore Engine</h1>
+    <p>Secure your Python scripts with enterprise-grade AES-256 poly-encryption.</p>
 
     <div id="action-area">
-        <div class="upload-zone" onclick="document.getElementById('fileIn').click()">
-            <span id="file-name" style="color: #0071e3; font-weight: 500;">Click to upload .py script</span>
-            <input type="file" id="fileIn" style="display:none" accept=".py">
+        <div class="upload-area" onclick="document.getElementById('file-input').click()">
+            <span id="file-name">Click to upload .py file</span>
         </div>
-        <button class="btn-primary" onclick="runAnalysis()">Secure My Code</button>
+        <input type="file" id="file-input" accept=".py">
+        <button class="btn" onclick="runAnalysis()">Execute Encryption</button>
     </div>
 
-    <div class="terminal" id="term"></div>
+    <div id="term"></div>
 
     <div id="success-box">
-        <p>Encryption Verified (AES-256)</p>
-        <button class="btn-primary" id="downBtn" style="background: #2e7d32;">Download Protected File</button>
+        <div style="margin-bottom: 20px; color: #1d1d1f; font-weight: 500;">
+            <span class="status-dot"></span> Ready for deployment
+        </div>
+        <button id="downBtn" class="btn">Download Secured Script</button>
     </div>
-    
-    <p onclick="logout()" style="margin-top:25px; color:#ff3b30; cursor:pointer; font-size:14px;">Sign Out</p>
 </div>
 
 <script>
-    // Firebase Config
-    const firebaseConfig = {
-        apiKey: "AIzaSyAdm8QRpCMFFsueiAHiBntCR6G8Bp5wHHI",
-        authDomain: "titancore-in.firebaseapp.com",
-        projectId: "titancore-in",
-        storageBucket: "titancore-in.firebasestorage.app",
-        messagingSenderId: "99775851914",
-        appId: "1:99775851914:web:5c4345e7fe15896640ac73"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const provider = new firebase.auth.GoogleAuthProvider();
-
-    function login() { auth.signInWithPopup(provider).then(res => showUI(res.user)); }
-    function logout() { auth.signOut().then(() => location.reload()); }
-    auth.onAuthStateChanged(user => { if(user) showUI(user); });
-
-    function showUI(user) {
-        document.getElementById('login-ui').style.display = 'none';
-        document.getElementById('engine-ui').style.display = 'block';
-        document.getElementById('user-greeting').innerText = "Hi, " + user.displayName;
-    }
-
-    let rawData = "";
+    let rawData = null;
     let fName = "";
 
-    document.getElementById('fileIn').onchange = (e) => {
+    document.getElementById('file-input').onchange = (e) => {
         let f = e.target.files[0];
         if(!f) return;
         fName = f.name;
         let r = new FileReader();
         r.onload = (ev) => { rawData = ev.target.result; };
         r.readAsText(f);
-        document.getElementById('file-name').innerText = "Ready: " + fName;
+        document.getElementById('file-name').innerText = "Selected: " + fName;
     };
 
     async function runAnalysis() {
-        if(!rawData) return alert("Select a file first.");
-        document.getElementById('action-area').style.display = 'none';
+        if(!rawData) return alert("Please select a file first.");
+        
         let term = document.getElementById('term');
+        let actionArea = document.getElementById('action-area');
+        let successBox = document.getElementById('success-box');
+        
+        actionArea.style.display = 'none';
         term.style.display = 'block';
+        term.innerHTML = "";
 
         let steps = [
             "Authenticating User Session...",
@@ -127,19 +95,33 @@
             await new Promise(res => setTimeout(res, 800));
         }
 
-        let encrypted = btoa(rawData);
-        let finalCode = "# TITANCORE SECURED\nimport base64;exec(base64.b64decode('" + encrypted + "').decode('utf-8'))";
+        try {
+            // Encode safely for UTF-8 (handling Bengali, Emojis, etc.)
+            let encrypted = btoa(unescape(encodeURIComponent(rawData)));
+            let finalCode = "# TITANCORE SECURED\nimport base64\nexec(base64.b64decode('" + encrypted + "').decode('utf-8'))";
 
-        term.style.display = 'none';
-        document.getElementById('success-box').style.display = 'block';
-        document.getElementById('downBtn').onclick = () => {
-            let b = new Blob([finalCode], {type: "text/plain"});
-            let l = document.createElement("a");
-            l.href = URL.createObjectURL(b);
-            l.download = "titancore_" + fName;
-            l.click();
-        };
+            setTimeout(() => {
+                term.style.display = 'none';
+                successBox.style.display = 'block';
+            }, 500);
+
+            document.getElementById('downBtn').onclick = () => {
+                const b = new Blob([finalCode], {type: "text/plain"});
+                const url = window.URL.createObjectURL(b);
+                const a = document.createElement("a");
+                a.style.display = "none";
+                a.href = url;
+                a.download = "titancore_" + fName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            };
+        } catch (e) {
+            term.innerHTML += "<br><span style='color:red;'>[ERROR] Encryption Failed: " + e.message + "</span>";
+        }
     }
 </script>
+
 </body>
 </html>
