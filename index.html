@@ -12,34 +12,41 @@
         :root { --primary: #0071e3; --bg: #ffffff; --card-bg: #f5f5f7; --text: #1d1d1f; }
         body { background-color: var(--bg); color: var(--text); font-family: "SF Pro Display", -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
         
-        /* Premium Apple Card */
-        .card { width: 100%; max-width: 480px; background: white; padding: 40px; border-radius: 32px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid #eee; transition: all 0.5s ease; }
-        .main-logo { width: 90px; height: 90px; border-radius: 22px; margin-bottom: 20px; object-fit: cover; box-shadow: 0 10px 25px rgba(0, 113, 227, 0.15); border: 3px solid #fff; }
+        /* White Apple Card with Soft Glow */
+        .card { 
+            width: 100%; max-width: 480px; background: white; padding: 40px; border-radius: 32px; 
+            text-align: center; box-shadow: 0 10px 40px rgba(0, 113, 227, 0.05), 0 0 20px rgba(0, 113, 227, 0.02); 
+            border: 1px solid rgba(0, 113, 227, 0.1); transition: all 0.5s ease; 
+        }
+        
+        .main-logo { width: 90px; height: 90px; border-radius: 22px; margin-bottom: 20px; object-fit: cover; box-shadow: 0 10px 25px rgba(0, 113, 227, 0.1); border: 3px solid #fff; }
+        
         .stats-badge { background: #f2f2f7; color: #1d1d1f; padding: 10px 20px; border-radius: 50px; font-size: 13px; font-weight: 600; margin-bottom: 25px; display: inline-block; }
         
-        /* High-End Scan Container */
+        /* Scanner UI with Azure Glow */
         .scan-container { 
-            text-align: left; background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(15px); 
-            color: #00ffcc; padding: 25px; border-radius: 24px; font-family: "SF Mono", "Fira Code", monospace; 
-            font-size: 12px; margin: 20px 0; display: none; min-height: 220px; line-height: 1.8; 
-            border: 1px solid rgba(0, 255, 204, 0.2); overflow: hidden; position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            text-align: left; background: #fbfbfd; color: #1d1d1f; padding: 25px; border-radius: 24px; 
+            font-family: "SF Mono", "Fira Code", monospace; font-size: 12px; margin: 20px 0; 
+            display: none; min-height: 220px; line-height: 1.8; border: 1px solid #d2d2d7; 
+            overflow: hidden; position: relative;
         }
 
-        /* Neural Pulse Animation */
+        /* Soft Pulse Animation */
         @keyframes pulse-glow {
-            0% { box-shadow: 0 0 5px rgba(0, 255, 204, 0.2); border-color: rgba(0, 255, 204, 0.2); }
-            50% { box-shadow: 0 0 25px rgba(0, 255, 204, 0.4); border-color: rgba(0, 255, 204, 0.6); }
-            100% { box-shadow: 0 0 5px rgba(0, 255, 204, 0.2); border-color: rgba(0, 255, 204, 0.2); }
+            0% { box-shadow: 0 0 5px rgba(0, 113, 227, 0.1); border-color: #d2d2d7; }
+            50% { box-shadow: 0 0 20px rgba(0, 113, 227, 0.2); border-color: var(--primary); }
+            100% { box-shadow: 0 0 5px rgba(0, 113, 227, 0.1); border-color: #d2d2d7; }
         }
         .scanning-active { animation: pulse-glow 2s infinite ease-in-out; }
 
         .log-line { opacity: 0; transform: translateY(10px); animation: fadeInUp 0.4s forwards; margin-bottom: 4px; }
+        .log-line:last-child { color: var(--primary); text-shadow: 0 0 8px rgba(0, 113, 227, 0.2); font-weight: 600; }
+        
         @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
-        /* Buttons & Zones */
         .btn-main { width: 100%; padding: 18px; background: #000; color: #fff; border: none; border-radius: 16px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         .btn-main:hover { transform: scale(1.02); background: #333; }
+        
         .upload-zone { border: 2px dashed #d2d2d7; padding: 40px 20px; border-radius: 24px; background: #fbfbfd; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
         .upload-zone:hover { background: #f2f2f7; border-color: var(--primary); }
 
@@ -101,7 +108,7 @@
     const provider = new firebase.auth.GoogleAuthProvider();
 
     let currentUser = null; let rawData = ""; let fName = "";
-    const DANGER_KEYWORDS = ["os.system", "subprocess", "eval", "base64.b64decode", "exec("];
+    const DANGER_KEYWORDS = ["os.system", "subprocess", "eval", "exec("];
 
     function login() { auth.signInWithPopup(provider); }
     function logout() { auth.signOut().then(() => location.reload()); }
@@ -121,17 +128,21 @@
     async function loadAuditHistory() {
         const auditTable = document.getElementById('audit-table');
         auditTable.innerHTML = "";
-        const snapshot = await db.collection("users").doc(currentUser.uid).collection("scans").orderBy("time", "desc").limit(5).get();
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const color = data.status === "DANGER" ? "#ff3b30" : "#28cd41";
-            auditTable.innerHTML += `<tr><td style='padding:10px 0; border-bottom:1px solid #f5f5f7;'>${data.fileName}</td><td style='padding:10px 0; border-bottom:1px solid #f5f5f7; text-align:right; color:${color}; font-weight:bold;'>${data.status}</td></tr>`;
-        });
+        try {
+            const snapshot = await db.collection("users").doc(currentUser.uid).collection("scans").orderBy("time", "desc").limit(5).get();
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const color = data.status === "DANGER" ? "#ff3b30" : "#28cd41";
+                auditTable.innerHTML += `<tr><td style='padding:10px 0; border-bottom:1px solid #f5f5f7;'>${data.fileName}</td><td style='padding:10px 0; border-bottom:1px solid #f5f5f7; text-align:right; color:${color}; font-weight:bold;'>${data.status}</td></tr>`;
+            });
+        } catch(e) {}
     }
 
     async function updateCounter() {
-        const doc = await db.collection("users").doc(currentUser.uid).get();
-        if(doc.exists) document.getElementById('file-count').innerText = doc.data().protectedCount || 0;
+        try {
+            const doc = await db.collection("users").doc(currentUser.uid).get();
+            if(doc.exists) document.getElementById('file-count').innerText = doc.data().protectedCount || 0;
+        } catch(e) {}
     }
 
     document.getElementById('fileIn').onchange = (e) => {
@@ -155,20 +166,13 @@
         sBox.classList.add('scanning-active');
         sBox.innerHTML = "";
 
-        // Premium Developer Logs
         let logs = [
             {t: "➔ [SYSTEM] Initializing Titancore Neural Core v4.0...", d: 400},
             {t: "➔ [AUTH] Verifying Developer Access...", d: 300},
             {t: "➔ [CLOUD] Syncing with Firebase Neural Database...", d: 500},
-            {t: "➔ [AUDIT] Deep scan: Analysing Abstract Syntax Tree...", d: 600},
-            {t: "➔ [AUDIT] Checking for Malicious Callbacks...", d: 500},
-            {t: "➔ [AUDIT] Entropy check: Inspecting Byte-patterns...", d: 400}
+            {t: "➔ [AUDIT] Deep scan: Analysing AST Patterns...", d: 600},
+            {t: "➔ [AUDIT] Inspecting Entropy for Malware Signs...", d: 500}
         ];
-
-        if(isSecured) {
-            logs.push({t: "🟢 [FOUND] Titancore Digital Signature Detected.", d: 400});
-            logs.push({t: "🟢 [VERIFY] Cryptographic Integrity: 100% Valid.", d: 300});
-        }
 
         for(let l of logs) {
             let line = document.createElement("div");
@@ -179,37 +183,30 @@
             await new Promise(r => setTimeout(r, l.d));
         }
 
-        // Save Result to Firebase
-        await db.collection("users").doc(currentUser.uid).collection("scans").add({
+        // Firebase Background Save
+        db.collection("users").doc(currentUser.uid).collection("scans").add({
             fileName: fName, status: finalStatus, time: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        await new Promise(r => setTimeout(r, 800));
+        }).catch(() => console.log("Cloud sync delayed"));
 
         if(finalStatus === "SECURE") {
-            sBox.innerHTML += `<div class="log-line" style="color:#28cd41; margin-top:10px; font-weight:bold;">🚀 [SUCCESS] Neural Shield Deployed.</div>`;
-            await new Promise(r => setTimeout(r, 1000));
-
             const userRef = db.collection("users").doc(currentUser.uid);
-            await userRef.set({ protectedCount: firebase.firestore.FieldValue.increment(1) }, { merge: true });
+            userRef.set({ protectedCount: firebase.firestore.FieldValue.increment(1) }, { merge: true });
             
             let finalOut = isSecured ? rawData : `# TITANCORE SECURED\nimport base64\nexec(base64.b64decode('${btoa(unescape(encodeURIComponent(rawData)))}').decode('utf-8'))`;
             
-            sBox.style.display = 'none';
-            sBox.classList.remove('scanning-active');
-            document.getElementById('success-box').style.display = 'block';
-            document.getElementById('success-msg').innerText = isSecured ? "Verification Successful: Assets are Protected." : "Neural Protection Applied Successfully.";
-            
-            document.getElementById('downBtn').onclick = () => {
-                let b = new Blob([finalOut], {type: "text/plain"});
-                let a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = isSecured ? fName : "titancore_" + fName; a.click();
-            };
-            updateCounter();
-            loadAuditHistory();
+            setTimeout(() => {
+                sBox.style.display = 'none';
+                document.getElementById('success-box').style.display = 'block';
+                document.getElementById('success-msg').innerText = "Neural Protection Applied Successfully.";
+                document.getElementById('downBtn').onclick = () => {
+                    let b = new Blob([finalOut], {type: "text/plain"});
+                    let a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "titancore_" + fName; a.click();
+                };
+                updateCounter();
+                loadAuditHistory();
+            }, 800);
         } else {
-            sBox.innerHTML += `<div class="log-line" style="color:#ff3b30; margin-top:10px; font-weight:bold;">🛑 [CRITICAL] Danger Detected. Access Denied.</div>`;
-            alert("Security Alert: Malicious code detected in " + fName);
-            await new Promise(r => setTimeout(r, 2000));
+            alert("Security Alert: Dangerous code detected.");
             location.reload();
         }
     }
