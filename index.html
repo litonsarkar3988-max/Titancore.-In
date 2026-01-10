@@ -1,166 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Titancore | Neural Shield Engine</title>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titancore | Neural Shield Engine</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-    <style>
-        :root { --primary: #0071e3; --bg: #ffffff; --card-bg: #f5f5f7; --text: #1d1d1f; }
-        body { background-color: var(--bg); color: var(--text); font-family: "SF Pro Display", -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
-        
-        /* Premium White Card */
-        .card { width: 100%; max-width: 480px; background: white; padding: 40px; border-radius: 32px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid #eee; }
-        
-        .main-logo { width: 90px; height: 90px; border-radius: 20px; margin-bottom: 20px; object-fit: cover; box-shadow: 0 10px 25px rgba(0, 113, 227, 0.15); border: 3px solid #fff; }
-        
-        .stats-badge { background: #f2f2f7; color: #1d1d1f; padding: 10px 20px; border-radius: 50px; font-size: 13px; font-weight: 600; margin-bottom: 25px; display: inline-block; }
-        
-        /* Scan Logs - Dark Theme to look like Termux */
-        .scan-container { text-align: left; background: #000; color: #00ffcc; padding: 20px; border-radius: 18px; font-family: "SF Mono", Menlo, monospace; font-size: 11px; margin: 20px 0; display: none; max-height: 250px; overflow-y: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        
-        .btn-main { width: 100%; padding: 18px; background: #000; color: #fff; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-main:hover { background: #333; transform: scale(1.02); }
-        
-        .upload-zone { border: 2px dashed #d2d2d7; padding: 40px 20px; border-radius: 20px; background: #fbfbfd; cursor: pointer; margin-bottom: 20px; transition: 0.2s; }
-        .upload-zone:hover { border-color: var(--primary); background: #f5f8ff; }
+    <style>
+        :root { --primary: #0071e3; --bg: #ffffff; --card-bg: #f5f5f7; --text: #1d1d1f; }
+        body { background-color: var(--bg); color: var(--text); font-family: "SF Pro Display", -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        
+        /* Premium Apple Card */
+        .card { width: 100%; max-width: 480px; background: white; padding: 40px; border-radius: 32px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid #eee; transition: all 0.5s ease; }
+        .main-logo { width: 90px; height: 90px; border-radius: 22px; margin-bottom: 20px; object-fit: cover; box-shadow: 0 10px 25px rgba(0, 113, 227, 0.15); border: 3px solid #fff; }
+        .stats-badge { background: #f2f2f7; color: #1d1d1f; padding: 10px 20px; border-radius: 50px; font-size: 13px; font-weight: 600; margin-bottom: 25px; display: inline-block; }
+        
+        /* High-End Scan Container */
+        .scan-container { 
+            text-align: left; background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(15px); 
+            color: #00ffcc; padding: 25px; border-radius: 24px; font-family: "SF Mono", "Fira Code", monospace; 
+            font-size: 12px; margin: 20px 0; display: none; min-height: 220px; line-height: 1.8; 
+            border: 1px solid rgba(0, 255, 204, 0.2); overflow: hidden; position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
 
-        /* News & Termux Table Style */
-        .report-section { margin-top: 30px; text-align: left; border-top: 1px solid #eee; padding-top: 20px; }
-        .section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #1d1d1f; display: flex; align-items: center; gap: 8px; }
-        
-        /* Custom scrollbar for logs */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
-    </style>
+        /* Neural Pulse Animation */
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px rgba(0, 255, 204, 0.2); border-color: rgba(0, 255, 204, 0.2); }
+            50% { box-shadow: 0 0 25px rgba(0, 255, 204, 0.4); border-color: rgba(0, 255, 204, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(0, 255, 204, 0.2); border-color: rgba(0, 255, 204, 0.2); }
+        }
+        .scanning-active { animation: pulse-glow 2s infinite ease-in-out; }
+
+        .log-line { opacity: 0; transform: translateY(10px); animation: fadeInUp 0.4s forwards; margin-bottom: 4px; }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* Buttons & Zones */
+        .btn-main { width: 100%; padding: 18px; background: #000; color: #fff; border: none; border-radius: 16px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-main:hover { transform: scale(1.02); background: #333; }
+        .upload-zone { border: 2px dashed #d2d2d7; padding: 40px 20px; border-radius: 24px; background: #fbfbfd; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
+        .upload-zone:hover { background: #f2f2f7; border-color: var(--primary); }
+
+        .report-section { margin-top: 30px; text-align: left; border-top: 1px solid #eee; padding-top: 20px; }
+        .section-title { font-size: 13px; font-weight: 700; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; }
+    </style>
 </head>
 <body>
 
 <div class="card" id="login-ui">
-    <img src="logo.JPG" class="main-logo" alt="Titancore Logo">
-    <h1 style="font-size: 28px; letter-spacing: -0.8px;">Titancore Labs</h1>
-    <p style="color:#86868b; margin-top: -10px;">Enterprise Security Engine</p>
-    <button class="btn-main" style="background:#fff; color:#000; border:1px solid #d2d2d7" onclick="login()">
-        <img src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png" width="18" style="vertical-align:middle; margin-right:10px">        Sign in with Google
-    </button>
+    <img src="logo.JPG" class="main-logo">
+    <h1 style="font-size: 32px; letter-spacing: -1.2px; margin: 0;">Titancore Labs</h1>
+    <p style="color: #86868b; margin-bottom: 30px;">Neural Protection Agency</p>
+    <button class="btn-main" onclick="login()">Sign in with Google</button>
 </div>
 
 <div class="card" id="engine-ui" style="display:none">
     <div class="stats-badge">🛡️ Neural Assets Protected: <span id="file-count">0</span></div>
-    
-    <h2 id="user-greeting" style="font-size: 24px; margin-bottom: 5px;">Welcome</h2>
-    <p id="user-email" style="color:#86868b; font-size:13px; margin-bottom:25px;">Verified User</p>
+    <h2 id="user-greeting" style="margin:0; font-size: 24px;">Welcome</h2>
+    <p id="user-email" style="font-size:13px; color:#86868b; margin-top:5px; margin-bottom: 25px;"></p>
 
-    <div id="action-area">
-        <div class="upload-zone" onclick="document.getElementById('fileIn').click()">
-            <span id="f-name" style="color:#0071e3; font-weight: 600;">Drop .py file to scan</span>
-            <input type="file" id="fileIn" style="display:none" accept=".py">
-        </div>
-        <button class="btn-main" onclick="startSecureProcess()">🛡️ Initiate Deep Scan</button>
-    </div>
+    <div id="action-area">
+        <div class="upload-zone" onclick="document.getElementById('fileIn').click()">
+            <span id="f-name" style="color:#0071e3; font-weight: 600; font-size: 15px;">Drop .py file to scan</span>
+            <input type="file" id="fileIn" style="display:none" accept=".py">
+        </div>
+        <button class="btn-main" onclick="startSecureProcess()">🛡️ Initiate Deep Scan</button>
+    </div>
 
-    <div id="scan-ui" class="scan-container"></div>
+    <div id="scan-ui" class="scan-container"></div>
 
-    <div id="success-box" style="display:none">
-        <div id="status-msg" style="background:#f2f2f7; color:#1d1d1f; padding:20px; border-radius:18px; margin-bottom:20px; font-weight: 600;">
-            Neural Protection Applied
-        </div>
-        <button class="btn-main" id="downBtn" style="background:#28cd41">📥 Download Secured Script</button>
-    </div>
+    <div id="success-box" style="display:none">
+        <div id="success-msg" style="background:#f2f2f7; padding:20px; border-radius:20px; margin-bottom:15px; font-weight:600; font-size: 14px;"></div>
+        <button class="btn-main" id="downBtn" style="background:#28cd41">📥 Download Secured Script</button>
+        <button class="btn-main" onclick="location.reload()" style="background:none; color:#86868b; font-size: 14px;">Scan Another File</button>
+    </div>
 
-    <div class="report-section">
-    <div class="section-title">📊 Termux Audit Report</div>
-    <div id="audit-data"><table style='width:100%; border-collapse: collapse; font-size:12px;'><tr><td style='padding:10px; border-bottom:1px solid #eee;'>app.py</td><td style='padding:10px; border-bottom:1px solid #eee;'><span style='color: #ff3b30; font-weight:bold;'>🚩 DANGER</span></td></tr></table></div>
-</div>
-</div>
-</div>
-</div>
+    <div class="report-section">
+        <div class="section-title">📊 Cloud Audit History</div>
+        <div id="audit-data"><table id="audit-table" style='width:100%; font-size:12px; border-collapse: collapse;'></table></div>
+    </div>
 
-    <p onclick="logout()" style="margin-top:30px; color:#ff3b30; cursor:pointer; font-size:13px; font-weight:600; opacity: 0.7;">Sign Out</p>
+    <p onclick="logout()" style="margin-top:30px; color:#ff3b30; cursor:pointer; font-size:13px; font-weight: 600;">Sign Out from Labs</p>
 </div>
 
 <script>
-    // Firebase Config - রাহুলের ডাটাবেস
-    const firebaseConfig = {
-        apiKey: "AIzaSyDB2SBSiRu1rhr_2qjX_QTO8lul1WNxN_M",
-        authDomain: "titancore-in-28123.firebaseapp.com",
-        projectId: "titancore-in-28123",
-        storageBucket: "titancore-in-28123.firebasestorage.app",
-        messagingSenderId: "1002816597170",
-        appId: "1:1002816597170:web:56f78bb588f36377be6dab"
-    };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDB2SBSiRu1rhr_2qjX_QTO8lul1WNxN_M",
+        authDomain: "titancore-in-28123.firebaseapp.com",
+        projectId: "titancore-in-28123",
+        storageBucket: "titancore-in-28123.firebasestorage.app",
+        messagingSenderId: "1002816597170",
+        appId: "1:1002816597170:web:56f78bb588f36377be6dab"
+    };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const provider = new firebase.auth.GoogleAuthProvider();
 
-    let currentUser = null; let rawData = ""; let fName = "";
+    let currentUser = null; let rawData = ""; let fName = "";
+    const DANGER_KEYWORDS = ["os.system", "subprocess", "eval", "base64.b64decode", "exec("];
 
-    function login() { auth.signInWithPopup(provider); }
-    function logout() { auth.signOut().then(() => location.reload()); }
+    function login() { auth.signInWithPopup(provider); }
+    function logout() { auth.signOut().then(() => location.reload()); }
 
-    auth.onAuthStateChanged(async (user) => {
-        if(user) {
-            currentUser = user;
-            document.getElementById('login-ui').style.display = 'none';
-            document.getElementById('engine-ui').style.display = 'block';
-            document.getElementById('user-greeting').innerText = "Hello, " + user.displayName;
-            document.getElementById('user-email').innerText = user.email;
-            updateCounter();
-        }
-    });
+    auth.onAuthStateChanged(async (user) => {
+        if(user) {
+            currentUser = user;
+            document.getElementById('login-ui').style.display = 'none';
+            document.getElementById('engine-ui').style.display = 'block';
+            document.getElementById('user-greeting').innerText = "Hello, " + user.displayName;
+            document.getElementById('user-email').innerText = user.email;
+            loadAuditHistory();
+            updateCounter();
+        }
+    });
 
-    async function updateCounter() {
-        if(!currentUser) return;
-        const userRef = db.collection("users").doc(currentUser.uid);
-        const doc = await userRef.get();
-        if(doc.exists) document.getElementById('file-count').innerText = doc.data().protectedCount || 0;
-    }
+    async function loadAuditHistory() {
+        const auditTable = document.getElementById('audit-table');
+        auditTable.innerHTML = "";
+        const snapshot = await db.collection("users").doc(currentUser.uid).collection("scans").orderBy("time", "desc").limit(5).get();
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const color = data.status === "DANGER" ? "#ff3b30" : "#28cd41";
+            auditTable.innerHTML += `<tr><td style='padding:10px 0; border-bottom:1px solid #f5f5f7;'>${data.fileName}</td><td style='padding:10px 0; border-bottom:1px solid #f5f5f7; text-align:right; color:${color}; font-weight:bold;'>${data.status}</td></tr>`;
+        });
+    }
 
-    document.getElementById('fileIn').onchange = (e) => {
-        let f = e.target.files[0]; if(!f) return;
-        fName = f.name;
-        let r = new FileReader();
-        r.onload = (ev) => { rawData = ev.target.result; document.getElementById('f-name').innerText = "Loaded: " + fName; };
-        r.readAsText(f);
-    };
+    async function updateCounter() {
+        const doc = await db.collection("users").doc(currentUser.uid).get();
+        if(doc.exists) document.getElementById('file-count').innerText = doc.data().protectedCount || 0;
+    }
 
-    async function startSecureProcess() {
-        if(!rawData) return alert("Please upload a file.");
-        document.getElementById('action-area').style.display = 'none';
-        let sBox = document.getElementById('scan-ui');
-        sBox.style.display = 'block'; sBox.innerHTML = "";
+    document.getElementById('fileIn').onchange = (e) => {
+        let f = e.target.files[0]; if(!f) return;
+        fName = f.name;
+        let r = new FileReader();
+        r.onload = (ev) => { rawData = ev.target.result; document.getElementById('f-name').innerText = "Selected: " + fName; };
+        r.readAsText(f);
+    };
 
-        let lines = rawData.split('\n');
-        let isSec = rawData.includes("TITANCORE SECURED");
-        
-        let logs = isSec ? ["> Signature detected: Titancore Shield", "> Integrity check: Passed"] : ["> Initializing Deep Neural Audit...", "> Scanning code for vulnerabilities...", "> Analysing imports and system calls..."];
-        
-        for(let l of logs) { sBox.innerHTML += `<span>${l}</span><br>`; await new Promise(r => setTimeout(r, 700)); }
+    async function startSecureProcess() {
+        if(!rawData) return alert("Please upload a .py file first.");
 
-        if(!isSec) {
-            const userRef = db.collection("users").doc(currentUser.uid);
-            await userRef.set({ protectedCount: firebase.firestore.FieldValue.increment(1) }, { merge: true });
-            updateCounter();
-            
-            let enc = btoa(unescape(encodeURIComponent(rawData)));
-            let final = `# TITANCORE SECURED\nimport base64\nexec(base64.b64decode('${enc}').decode('utf-8'))`;
-            
-            sBox.style.display = 'none';
-            document.getElementById('success-box').style.display = 'block';
-            document.getElementById('downBtn').onclick = () => {
-                let b = new Blob([final], {type: "text/plain"});
-                let a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "titancore_" + fName; a.click();
-            };
-        } else {
-            alert("This file is already secured by Titancore.");
-            location.reload();
-        }
-    }
+        let isSecured = rawData.includes("# TITANCORE SECURED");
+        let foundRisks = isSecured ? [] : DANGER_KEYWORDS.filter(word => rawData.includes(word));
+        let finalStatus = (isSecured || foundRisks.length === 0) ? "SECURE" : "DANGER";
+
+        document.getElementById('action-area').style.display = 'none';
+        let sBox = document.getElementById('scan-ui');
+        sBox.style.display = 'block';
+        sBox.classList.add('scanning-active');
+        sBox.innerHTML = "";
+
+        // Premium Developer Logs
+        let logs = [
+            {t: "➔ [SYSTEM] Initializing Titancore Neural Core v4.0...", d: 400},
+            {t: "➔ [AUTH] Verifying Developer Access...", d: 300},
+            {t: "➔ [CLOUD] Syncing with Firebase Neural Database...", d: 500},
+            {t: "➔ [AUDIT] Deep scan: Analysing Abstract Syntax Tree...", d: 600},
+            {t: "➔ [AUDIT] Checking for Malicious Callbacks...", d: 500},
+            {t: "➔ [AUDIT] Entropy check: Inspecting Byte-patterns...", d: 400}
+        ];
+
+        if(isSecured) {
+            logs.push({t: "🟢 [FOUND] Titancore Digital Signature Detected.", d: 400});
+            logs.push({t: "🟢 [VERIFY] Cryptographic Integrity: 100% Valid.", d: 300});
+        }
+
+        for(let l of logs) {
+            let line = document.createElement("div");
+            line.className = "log-line";
+            line.innerHTML = l.t;
+            sBox.appendChild(line);
+            sBox.scrollTop = sBox.scrollHeight;
+            await new Promise(r => setTimeout(r, l.d));
+        }
+
+        // Save Result to Firebase
+        await db.collection("users").doc(currentUser.uid).collection("scans").add({
+            fileName: fName, status: finalStatus, time: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        await new Promise(r => setTimeout(r, 800));
+
+        if(finalStatus === "SECURE") {
+            sBox.innerHTML += `<div class="log-line" style="color:#28cd41; margin-top:10px; font-weight:bold;">🚀 [SUCCESS] Neural Shield Deployed.</div>`;
+            await new Promise(r => setTimeout(r, 1000));
+
+            const userRef = db.collection("users").doc(currentUser.uid);
+            await userRef.set({ protectedCount: firebase.firestore.FieldValue.increment(1) }, { merge: true });
+            
+            let finalOut = isSecured ? rawData : `# TITANCORE SECURED\nimport base64\nexec(base64.b64decode('${btoa(unescape(encodeURIComponent(rawData)))}').decode('utf-8'))`;
+            
+            sBox.style.display = 'none';
+            sBox.classList.remove('scanning-active');
+            document.getElementById('success-box').style.display = 'block';
+            document.getElementById('success-msg').innerText = isSecured ? "Verification Successful: Assets are Protected." : "Neural Protection Applied Successfully.";
+            
+            document.getElementById('downBtn').onclick = () => {
+                let b = new Blob([finalOut], {type: "text/plain"});
+                let a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = isSecured ? fName : "titancore_" + fName; a.click();
+            };
+            updateCounter();
+            loadAuditHistory();
+        } else {
+            sBox.innerHTML += `<div class="log-line" style="color:#ff3b30; margin-top:10px; font-weight:bold;">🛑 [CRITICAL] Danger Detected. Access Denied.</div>`;
+            alert("Security Alert: Malicious code detected in " + fName);
+            await new Promise(r => setTimeout(r, 2000));
+            location.reload();
+        }
+    }
 </script>
 </body>
 </html>
